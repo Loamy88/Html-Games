@@ -9,7 +9,9 @@
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="1100" height="650"></canvas>
+    <!-- Canvas element for the game -->
+    <canvas id="gameCanvas" width="1100" height="520"></canvas>
+
     <script>
         // Initialize canvas
         const canvas = document.getElementById("gameCanvas");
@@ -18,20 +20,31 @@
         // Set cell width and height
         const cellSize = 20;
 
-        // Initialize snake
-        let snake = [{ x: 10, y: 10 }];
+        // Map dimensions (in cells)
+        const mapWidth = 55;
+        const mapHeight = 26;
+
+        // Initialize snake and food with random positions
+        let snake = [{ x: getRandomPosition(mapWidth), y: getRandomPosition(mapHeight) }];
+        let food = { x: getRandomPosition(mapWidth), y: getRandomPosition(mapHeight) };
+
+        // Direction variables
         let dx = 0;
         let dy = 0;
 
-        // Initialize food
-        let food = { x: 15, y: 15 };
+        // Audio setup
+        const audio = new Audio();  // Create a new Audio object
+
+        // Score
+        let score = 0;
 
         // Game loop
         function gameLoop() {
             moveSnake();
             if (isGameOver()) {
-                alert("Game Over!");
-                document.location.reload();
+                alert(`Game Over! Your score is ${score}.`);
+                document.location.reload(); // Reload the page upon OK click
+                // Alternatively, use window.close() to close the page instead of reload
             }
             draw();
         }
@@ -42,6 +55,8 @@
             snake.unshift(head);
             if (head.x === food.x && head.y === food.y) {
                 generateFood();
+                playEatSound(); // Play sound when food is eaten
+                score++; // Increase score
             } else {
                 snake.pop();
             }
@@ -51,18 +66,23 @@
         function isGameOver() {
             return (
                 snake[0].x < 0 ||
-                snake[0].x >= canvas.width / cellSize ||
+                snake[0].x >= mapWidth ||
                 snake[0].y < 0 ||
-                snake[0].y >= canvas.height / cellSize ||
+                snake[0].y >= mapHeight ||
                 snake.slice(1).some(segment => segment.x === snake[0].x && segment.y === snake[0].y)
             );
         }
 
-        // Generate food
+        // Generate random position within map boundaries
+        function getRandomPosition(max) {
+            return Math.floor(Math.random() * max);
+        }
+
+        // Generate food at random position
         function generateFood() {
             food = {
-                x: Math.floor(Math.random() * (canvas.width / cellSize)),
-                y: Math.floor(Math.random() * (canvas.height / cellSize))
+                x: getRandomPosition(mapWidth),
+                y: getRandomPosition(mapHeight)
             };
         }
 
@@ -118,11 +138,15 @@
             }
         });
 
+        // Play sound when snake eats food
+        function playEatSound() {
+            // Replace 'sound_url_here' with your hosted sound URL
+            audio.src = 'https://github.com/Loamy88/Html-Games/blob/main/632232__audacitier__biting-apple-1.mp3?raw=true';
+            audio.play();
+        }
+
         // Start the game loop
         setInterval(gameLoop, 100);
     </script>
 </body>
 </html>
-
-
-
