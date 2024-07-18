@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Snake Game</title>
+    <style>
+        #gameCanvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="1100" height="520"></canvas>
+    <audio id="eatSound">
+        <source src="https://github.com/Loamy88/Html-Games/raw/main/632232__audacitier__biting-apple-1.mp3" type="audio/mpeg">
+    </audio>
+    <script>
+        // Initialize canvas
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Set cell width and height
+        const cellSize = 20;
+        const bufferCells = 3; // Number of cells away from the wall
+
+        // Function to generate random coordinates ensuring the buffer from the wall
+        function getRandomCoordinate(max) {
+            const maxCells = max / cellSize;
+            return Math.floor(Math.random() * (maxCells - 2 * bufferCells)) + bufferCells;
+        }
+
+        // Initialize snakes with random positions
+        let snake1 = [{ x: getRandomCoordinate(canvas.width), y: getRandomCoordinate(canvas.height) }];
+        let dx1 = 0;
+        let dy1 = 0;
+
+        let snake2 = [{ x: getRandomCoordinate(canvas.width), y: getRandomCoordinate(canvas.height) }];
+        let dx2 = 0;
+        let dy2 = 0;
+
+        // Initialize food with random position
+        let foods = [{ x: getRandomCoordinate(canvas.width), y: getRandomCoordinate(canvas.height) }];
+        let additionalFood = false;
+
+        let gameInterval;
+        let player1Ready = false;
+        let player2Ready = false;
+
+        let foodEatenCount1 = 0;
+        let foodEatenCount2 = 0;
+        let rainbowPowerUp = null;
+        let rainbowPowerUpActive = false;
+        let powerUpEndTime = 0;
+
+        // Audio element for eating sound
+        const eatSound = document.getElementById("eatSound");
+
+        // Game loop
+        function gameLoop() {
+            moveSnake(snake1, dx1, dy1);
+            moveSnake(snake2, dx2, dy2);
+
+            if (rainbowPowerUpActive && Date.now() > powerUpEndTime) {
+                resetSpeed();
+                rainbowPowerUpActive = false;
+            }
+
+            let gameOver1 = isGameOver(snake1, snake2);
+            let gameOver2 = isGameOver(snake2, snake1);
+
+            if (gameOver1 || gameOver2) {
+                clearInterval(gameInterval);
+                if (gameOver1 && gameOver2) {
+                    alert("It's a tie!");
+                } else if (gameOver1) {
+                    alert("Blue snake wins!");
+                } else if (gameOver2) {
+                    alert("Green snake wins!");
+                }
+                document.location.reload();
+            } else {
+                draw();
+            }
+        }
+
+        // Move snake
+        function moveSnake(snake, dx, dy) {
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+            snake.unshift(head);
+
+            let ateFood = false;
+            for (let i = 0; i < foods.length; i++) {
+                if (head.x === foods[i].x && head.y === foods[i].y) {
+                    ateFood = true;
+                    foods.splice(i, 1);
+                    break;
+                }
+            }
+
+            if (ateFood) {
+                if (snake === snake1) {
+                    foodEatenCount1++;
+                } else {
+                    foodEatenCount2++;
+                }
+                eatSound.play(); // Play the eating sound
+                generateFood();
+
+                if ((foodEatenCount1 + foodEatenCount2) % 6 === 0) {
+                    generateRainbowPowerUp();
+                }
+
+                if (foodEatenCount1 >= 10 && foodEatenCount2 >= 10 && !additionalFood) {
+                    additionalFood = true;
+                    generateFood();  // Generate the second food item
+                }
+            } else {
+                snake.pop();
+            }
+
+            if (rainbowPowerUp && head.x === rainbowPowerUp.x && head.y === rainbowPowerUp.y) {
+                applyPowerUp(snake === snake1 ? snake2 : snake1, snake);
+                rainbowPowerUp = null;
+            }
+        }
+
+        // Check if game over
+        function isGameOver(snake, otherSnake) {
+            return (
+                snake[0].x < 0 ||
+                snake[0].x >= canvas.width / cellSize ||
+                snake[0].y < 0 ||
+                snake[0].y >= canvas.height / cellSize ||
+                snake.slice(1).some(segment => segment.x === snake[0].x && segment.y === snake[0].y) ||
+                otherSnake.some(segment => segment.x === snake[0].x && segment.y === snake[0].y)
+            );
+        }
+
+        // Generate food
+        function generateFood() {
+            foods.push({
+                x: getRandomCoordinate(canvas.width),
+                y: getRandomCoordinate(canvas.height)
+            });
+        }
+
+        // Generate rainbow power-up
+        function generateRainbowPowerUp() {
+            rainbowPowerUp = {
+                x: getRandomCoordinate(canvas.width),
+                y: getRandomCoordinate(canvas.height)
+            };
+        }
+
+        // Apply power-up effect
+        function applyPowerUp(enemySnake, currentSnake) {
+            const powerUpEffects = ["speed", "grow", "teleport"];
+            const effect = powerUpEffects[Math.floor(Math.random() * powerUpEffects.length)];
+
+            switch (effect) {
+                case "speed":
+                    setSpeed(50);
+                    powerUpEndTime = Date.now() + 5000;
+                    rainbowPowerUpActive = true;
+                    break;
+                case "grow":
+                    growSnake(currentSnake, 2);
+                    shrinkSnake(enemySnake, 3);
+                    break;
+                case "teleport":
+                    teleportSnake(currentSnake);
+                    break;
+            }
+        }
+
+        // Set snake speed
+        function setSpeed(interval) {
+            clearInterval(gameInterval);
+            gameInterval = setInterval(gameLoop, interval);
+        }
+
+        // Reset snake speed
+        function resetSpeed() {
+            setSpeed(100);
+        }
+
+        // Grow snake
+        function growSnake(snake, length) {
+            for (let i = 0; i < length; i++) {
+                snake.push({ ...snake[snake.length - 1] });
+            }
+        }
+
+        // Shrink snake
+        function shrinkSnake(snake, length) {
+            for (let i = 0; i < length; i++) {
+                if (snake.length > 1) {
+                    snake.pop();
+                }
+            }
+        }
+
+        // Teleport snake
+        function teleportSnake(snake) {
+            let validLocation = false;
+            let newX, newY;
+            for (let attempts = 0; attempts < 100; attempts++) {
+                newX = getRandomCoordinate(canvas.width);
+                newY = getRandomCoordinate(canvas.height);
+                if (!snake.some(segment => segment.x === newX && segment.y === newY) &&
+                    Math.abs(newX - snake[0].x) > 2 && Math.abs(newY - snake[0].y) > 2) {
+                    validLocation = true;
+                    break;
+                }
+            }
+            if (validLocation) {
+                snake[0].x = newX;
+                snake[0].y = newY;
+            }
+        }
+
+        // Draw
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawSnake(snake1, "green");
+            drawSnake(snake2, "blue");
+            drawFood();
+            drawRainbowPowerUp();
+        }
+
+        // Draw snake
+        function drawSnake(snake, color) {
+            ctx.fillStyle = color;
+            snake.forEach(segment => {
+                ctx.fillRect(segment.x * cellSize, segment.y * cellSize, cellSize, cellSize);
+            });
+        }
+
+        // Draw food
+        function drawFood() {
+            ctx.fillStyle = "red";
+            foods.forEach(food => {
+                ctx.fillRect(food.x * cellSize, food.y * cellSize, cellSize, cellSize);
+            });
+        }
+
+        // Draw rainbow power-up
+        function drawRainbowPowerUp() {
+            if (rainbowPowerUp) {
+                const rainbowGradient = ctx.createLinearGradient(rainbowPowerUp.x * cellSize, rainbowPowerUp.y * cellSize, (rainbowPowerUp.x + 1) * cellSize, (rainbowPowerUp.y + 1) * cellSize);
+                rainbowGradient.addColorStop(0, "red");
+                rainbowGradient.addColorStop(0.2, "orange");
+                rainbowGradient.addColorStop(0.4, "yellow");
+                rainbowGradient.addColorStop(0.6, "green");
+                rainbowGradient.addColorStop(0.8, "blue");
+                rainbowGradient.addColorStop(1, "violet");
+                ctx.fillStyle = rainbowGradient;
+                ctx.fillRect(rainbowPowerUp.x * cellSize, rainbowPowerUp.y * cellSize, cellSize, cellSize);
+            }
+        }
+
+        // Handle key presses
+        document.addEventListener("keydown", event => {
+            const key = event.key.toLowerCase();
+            switch (key) {
+                // Controls for Snake 1
+                case "w":
+                    if (dy1 !== 1 || snake1.length === 1) {
+                        dx1 = 0;
+                        dy1 = -1;
+                    }
+                    player1Ready = true;
+                    break;
+                case "s":
+                    if (dy1 !== -1 || snake1.length === 1) {
+                        dx1 = 0;
+                        dy1 = 1;
+                    }
+                    player1Ready = true;
+                    break;
+                case "a":
+                    if (dx1 !== 1 || snake1.length === 1) {
+                        dx1 = -1;
+                        dy1 = 0;
+                    }
+                    player1Ready = true;
+                    break;
+                case "d":
+                    if (dx1 !== -1 || snake1.length === 1) {
+                        dx1 = 1;
+                        dy1 = 0;
+                    }
+                    player1Ready = true;
+                    break;
+
+                // Controls for Snake 2
+                case "i":
+                    if (dy2 !== 1 || snake2.length === 1) {
+                        dx2 = 0;
+                        dy2 = -1;
+                    }
+                    player2Ready = true;
+                    break;
+                case "k":
+                    if (dy2 !== -1 || snake2.length === 1) {
+                        dx2 = 0;
+                        dy2 = 1;
+                    }
+                    player2Ready = true;
+                    break;
+                case "j":
+                    if (dx2 !== 1 || snake2.length === 1) {
+                        dx2 = -1;
+                        dy2 = 0;
+                    }
+                    player2Ready = true;
+                    break;
+                case "l":
+                    if (dx2 !== -1 || snake2.length === 1) {
+                        dx2 = 1;
+                        dy2 = 0;
+                    }
+                    player2Ready = true;
+                    break;
+            }
+
+            // Start the game loop if both players are ready
+            if (player1Ready && player2Ready && !gameInterval) {
+                gameInterval = setInterval(gameLoop, 100);
+            }
+        });
+
+        // Initial draw to show initial positions
+        draw();
+    </script>
+</body>
+</html>
