@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Snake Game</title>
+    <style>
+        #gameCanvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="1100" height="520"></canvas>
+    <audio id="foodSound" src="https://github.com/Loamy88/Html-Games/raw/main/632232__audacitier__biting-apple-1.mp3"></audio>
+    <script>
+        // Initialize canvas
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Set cell width and height
+        const cellSize = 20;
+
+        // Initialize player snake
+        let snake = [{ x: 10, y: 10 }];
+        let dx = 0;
+        let dy = 0;
+
+        // Initialize enemy snake
+        let enemySnake = [{ x: 20, y: 20 }];
+        let enemyDx = 0;
+        let enemyDy = 0;
+        let enemyStarted = false;
+
+        // Initialize food and power-ups
+        let food = { x: 15, y: 15 };
+        let powerUp = null;
+        let foodEaten = 0;
+
+        // Initialize power-up types
+        const powerUpTypes = ["length", "slow"];
+
+        // Flag to check if the player has started moving
+        let playerStarted = false;
+
+        // Number of obstacles
+        const numObstacles = 10;
+        const obstacles = generateObstacles(numObstacles);
+
+        // Speed control
+        let normalSpeed = 100;
+        let currentSpeed = normalSpeed;
+        let speedBoostDuration = 7500; // in milliseconds (7.5 seconds)
+        let speedBoostEndTime = 0;
+
+        // Rainbow colors for power-ups
+        const rainbowColors = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"];
+        let rainbowIndex = 0;
+
+        // Game loop
+        function gameLoop() {
+            moveSnake();
+            if (playerStarted) {
+                moveEnemySnake();
+            }
+            if (isGameOver()) {
+                alert("Game Over!");
+                document.location.reload();
+            }
+            draw();
+
+            // Check for speed boost duration
+            if (Date.now() > speedBoostEndTime) {
+                currentSpeed = normalSpeed;
+            }
+        }
+
+        // Move player snake
+        function moveSnake() {
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+            snake.unshift(head);
+            if (head.x === food.x && head.y === food.y) {
+                playFoodSound();
+                generateFood();
+                foodEaten++;
+                // Spawn power-up every 3 food eaten
+                if (foodEaten % 3 === 0) {
+                    generatePowerUp();
+                }
+            } else {
+                snake.pop();
+            }
+
+            if (powerUp && head.x === powerUp.x && head.y === powerUp.y) {
+                activatePowerUp(powerUp.type);
+                powerUp = null;
+            }
+        }
+
+        // Move enemy snake
+        function moveEnemySnake() {
+            if (!enemyStarted) {
+                return; // Don't move until player moves
+            }
+
+            const diffX = food.x - enemySnake[0].x;
+            const diffY = food.y - enemySnake[0].y;
+
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                enemyDx = diffX > 0 ? 1 : -1;
+                enemyDy = 0;
+            } else {
+                enemyDx = 0;
+                enemyDy = diffY > 0 ? 1 : -1;
+            }
+
+            if (enemySnake[0].x + enemyDx < 0 || enemySnake[0].x + enemyDx >= canvas.width / cellSize) {
+                enemyDx = 0;
+                enemyDy = diffY > 0 ? 1 : -1;
+            }
+
+            if (enemySnake[0].y + enemyDy < 0 || enemySnake[0].y + enemyDy >= canvas.height / cellSize) {
+                enemyDy = 0;
+                enemyDx = diffX > 0 ? 1 : -1;
+            }
+
+            const head = { x: enemySnake[0].x + enemyDx, y: enemySnake[0].y + enemyDy };
+            enemySnake.unshift(head);
+            if (head.x === food.x && head.y === food.y) {
+                generateFood();
+            } else {
+                enemySnake.pop();
+            }
+        }
+
+        // Check if game over
+        function isGameOver() {
+            return (
+                snake[0].x < 0 ||
+                snake[0].x >= canvas.width / cellSize ||
+                snake[0].y < 0 ||
+                snake[0].y >= canvas.height / cellSize ||
+                snake.slice(1).some(segment => segment.x === snake[0].x && segment.y === snake[0].y) ||
+                enemySnake.some(segment => segment.x === snake[0].x && segment.y === snake[0].y) ||
+                obstacles.some(obstacle => obstacle.x === snake[0].x && obstacle.y === snake[0].y)
+            );
+        }
+
+        // Generate food
+        function generateFood() {
+            do {
+                food = {
+                    x: Math.floor(Math.random() * (canvas.width / cellSize)),
+                    y: Math.floor(Math.random() * (canvas.height / cellSize))
+                };
+            } while (snake.some(segment => segment.x === food.x && segment.y === food.y) ||
+                     enemySnake.some(segment => segment.x === food.x && segment.y === food.y) ||
+                     obstacles.some(obstacle => obstacle.x === food.x && obstacle.y === food.y));
+        }
+
+        // Generate random obstacles
+        function generateObstacles(num) {
+            const generatedObstacles = [];
+            for (let i = 0; i < num; i++) {
+                let obstacle;
+                do {
+                    obstacle = {
+                        x: Math.floor(Math.random() * (canvas.width / cellSize)),
+                        y: Math.floor(Math.random() * (canvas.height / cellSize))
+                    };
+                } while (snake.some(segment => segment.x === obstacle.x && segment.y === obstacle.y) ||
+                         enemySnake.some(segment => segment.x === obstacle.x && segment.y === obstacle.y) ||
+                         generatedObstacles.some(obs => obs.x === obstacle.x && obs.y === obstacle.y) ||
+                         (obstacle.x === food.x && obstacle.y === food.y));
+                generatedObstacles.push(obstacle);
+            }
+            return generatedObstacles;
+        }
+
+        // Generate power-up
+        function generatePowerUp() {
+            powerUp = {
+                x: Math.floor(Math.random() * (canvas.width / cellSize)),
+                y: Math.floor(Math.random() * (canvas.height / cellSize)),
+                type: powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)] // Randomly select power-up type
+            };
+        }
+
+        // Activate power-up
+        function activatePowerUp(type) {
+            switch (type) {
+                case "length":
+                    const additionalLength = Math.random() < 0.5 ? 1 : 2;
+                    for (let i = 0; i < additionalLength; i++) {
+                        snake.push({ ...snake[snake.length - 1] });
+                    }
+                    break;
+                case "slow":
+                    currentSpeed = normalSpeed * 0.75; // 25% slower speed
+                    speedBoostEndTime = Date.now() + speedBoostDuration; // 7.5 seconds duration
+                    break;
+            }
+        }
+
+        // Draw
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawSnake(snake, "green");
+            drawSnake(enemySnake, "blue");
+            drawObstacles();
+            drawFood();
+            drawPowerUp();
+        }
+
+        // Draw snake
+        function drawSnake(snake, color) {
+            ctx.fillStyle = color;
+            snake.forEach(segment => {
+                ctx.fillRect(segment.x * cellSize, segment.y * cellSize, cellSize, cellSize);
+            });
+        }
+
+        // Draw obstacles
+        function drawObstacles() {
+            ctx.fillStyle = "white";
+            ctx.strokeStyle = "black";
+            obstacles.forEach(obstacle => {
+                ctx.fillRect(obstacle.x * cellSize, obstacle.y * cellSize, cellSize, cellSize);
+                ctx.strokeRect(obstacle.x * cellSize, obstacle.y * cellSize, cellSize, cellSize);
+            });
+        }
+
+        // Draw food
+        function drawFood() {
+            ctx.fillStyle = "red";
+            ctx.fillRect(food.x * cellSize, food.y * cellSize, cellSize, cellSize);
+        }
+
+        // Draw power-up
+        function drawPowerUp() {
+            if (powerUp) {
+                ctx.fillStyle = rainbowColors[rainbowIndex];
+                ctx.fillRect(powerUp.x * cellSize, powerUp.y * cellSize, cellSize, cellSize);
+                rainbowIndex = (rainbowIndex + 1) % rainbowColors.length;
+            }
+        }
+
+        // Handle key presses
+        document.addEventListener("keydown", event => {
+            const key = event.key.toLowerCase();
+            switch (key) {
+                case "w":
+                    if (dy !== 1 || snake.length === 1) {
+                        dx = 0;
+                        dy = -1;
+                        playerStarted = true;
+                        if (!enemyStarted) {
+                            enemyStarted = true;
+                        }
+                    }
+                    break;
+                case "s":
+                    if (dy !== -1 || snake.length === 1) {
+                        dx = 0;
+                        dy = 1;
+                        playerStarted = true;
+                        if (!enemyStarted) {
+                            enemyStarted = true;
+                        }
+                    }
+                    break;
+                case "a":
+                    if (dx !== 1 || snake.length === 1) {
+                        dx = -1;
+                        dy = 0;
+                        playerStarted = true;
+                        if (!enemyStarted) {
+                            enemyStarted = true;
+                        }
+                    }
+                    break;
+                case "d":
+                    if (dx !== -1 || snake.length === 1) {
+                        dx = 1;
+                        dy = 0;
+                        playerStarted = true;
+                        if (!enemyStarted) {
+                            enemyStarted = true;
+                        }
+                    }
+                    break;
+            }
+        });
+
+        // Play food eaten sound
+        function playFoodSound() {
+            const audio = document.getElementById("foodSound");
+            audio.currentTime = 0; // Rewind to the beginning
+            audio.play();
+        }
+
+        // Start the game loop
+        setInterval(gameLoop, currentSpeed);
+    </script>
+</body>
+</html>
