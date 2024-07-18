@@ -41,7 +41,7 @@
     </div>
 
     <script>
-        const encodedPassword = 'bGV0LW1lLWlu'; // base64 encoded 'let-me-in'
+        const encodedPassword = 'bGV0LW1lLWlu'; // you will not figure it out
 
         function checkPassword() {
             const passwordInput = document.getElementById('password').value;
