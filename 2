@@ -125,6 +125,7 @@
             const head = { x: enemySnake[0].x + enemyDx, y: enemySnake[0].y + enemyDy };
             enemySnake.unshift(head);
             if (head.x === food.x && head.y === food.y) {
+                playFoodSound(); // Play sound when enemy eats food
                 generateFood();
             } else {
                 enemySnake.pop();
