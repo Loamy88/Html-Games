@@ -23,38 +23,15 @@
         button:hover {
             background-color: #45a049;
         }
-        #game-selection {
-            display: none;
-        }
     </style>
 </head>
 <body>
-    <h2>Enter Password to Access Snake Gamemodes:</h2>
-    <input type="password" id="password" placeholder="Enter password">
-    <button onclick="checkPassword()">Submit</button>
-
-    <div id="game-selection">
-        <h2>Choose a Snake Gamemode:</h2>
-        <button onclick="openGame('https://raw.githubusercontent.com/Loamy88/Html-Games/main/classic')">Classic</button>
-        <button onclick="openGame('https://raw.githubusercontent.com/Loamy88/Html-Games/main/twoplayer')">Two Player</button>
-        <button onclick="openGame('https://raw.githubusercontent.com/Loamy88/Html-Games/main/2')">Version 2.0</button>
-    </div>
+    <h2>Choose a Snake Gamemode:</h2>
+    <button onclick="openGame('https://raw.githubusercontent.com/Loamy88/Html-Games/main/classic')">Classic</button>
+    <button onclick="openGame('https://raw.githubusercontent.com/Loamy88/Html-Games/main/twoplayer')">Two Player</button>
+    <button onclick="openGame('https://raw.githubusercontent.com/Loamy88/Html-Games/main/2')">Version 2.0</button>
 
     <script>
-        const encodedPassword = 'bGV0LW1lLWlu'; // you will not figure it out
-
-        function checkPassword() {
-            const passwordInput = document.getElementById('password').value;
-            const encodedInput = btoa(passwordInput);
-            if (encodedInput === encodedPassword) {
-                document.getElementById('game-selection').style.display = 'block';
-                document.getElementById('password').style.display = 'none';
-                document.querySelector('button[onclick="checkPassword()"]').style.display = 'none';
-            } else {
-                alert('Incorrect password. Please try again.');
-            }
-        }
-
         function openGame(url) {
             fetch(url)
                 .then(response => response.text())
