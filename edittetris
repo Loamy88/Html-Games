@@ -21,7 +21,7 @@
         .score {
             position: absolute;
             top: 20px;
-            left: 20px;
+            left: 100px;
         }
         .preview {
             position: absolute;
@@ -76,25 +76,25 @@
         <h3>Settings</h3>
         <div id="keyBindings">
             <div>
-                <label>Move Left (A): <input type="text" id="leftKey" readonly></label>
+                <label>Move Left: <input type="text" id="leftKey" readonly></label>
             </div>
             <div>
-                <label>Move Right (D): <input type="text" id="rightKey" readonly></label>
+                <label>Move Right: <input type="text" id="rightKey" readonly></label>
             </div>
             <div>
-                <label>Move Down (S): <input type="text" id="downKey" readonly></label>
+                <label>Move Down: <input type="text" id="downKey" readonly></label>
             </div>
             <div>
-                <label>Hard Drop (W): <input type="text" id="hardDropKey" readonly></label>
+                <label>Hard Drop: <input type="text" id="hardDropKey" readonly></label>
             </div>
             <div>
-                <label>Rotate Left (I): <input type="text" id="rotateLeftKey" readonly></label>
+                <label>Rotate Left: <input type="text" id="rotateLeftKey" readonly></label>
             </div>
             <div>
-                <label>Rotate Right (O): <input type="text" id="rotateRightKey" readonly></label>
+                <label>Rotate Right: <input type="text" id="rotateRightKey" readonly></label>
             </div>
             <div>
-                <label>Restart (R): <input type="text" id="restartKey" readonly></label>
+                <label>Restart: <input type="text" id="restartKey" readonly></label>
             </div>
         </div>
         <button onclick="saveSettings()">Save</button>
