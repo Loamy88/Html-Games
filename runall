@@ -35,7 +35,7 @@
 
     <div id="game-selection">
         <h2>Choose a Game:</h2>
-        <button onclick="openGame('https://raw.githubusercontent.com/Loamy88/Html-Games/main/tetris')">Tetris</button>
+        <button onclick="openGame('https://raw.githubusercontent.com/Loamy88/Html-Games/main/tmode')">Tetris</button>
         <button onclick="openGame('https://raw.githubusercontent.com/Loamy88/Html-Games/main/pong')">Pong</button>
         <button onclick="openGame('https://raw.githubusercontent.com/Loamy88/Html-Games/main/snake')">Snake</button>
     </div>
