@@ -1,0 +1,1 @@
+javascript:(function(){  fetch('https://raw.githubusercontent.com/Loamy88/Html-Games/main/runall')    .then(response => response.text())    .then(html => {      const newWindow = window.open();      newWindow.document.open();      newWindow.document.write(html);      newWindow.document.close();    })    .catch(error => console.error('Error fetching HTML:', error));})();
