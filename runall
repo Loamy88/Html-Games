@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Menu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #game-selection {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h2>Enter Password to Access Game Menu:</h2>
+    <input type="password" id="password" placeholder="Enter password">
+    <button onclick="checkPassword()">Submit</button>
+
+    <div id="game-selection">
+        <h2>Choose a Game:</h2>
+        <button onclick="openGame('https://raw.githubusercontent.com/Loamy88/Html-Games/main/tetris')">Tetris</button>
+        <button onclick="openGame('https://raw.githubusercontent.com/Loamy88/Html-Games/main/pong')">Pong</button>
+        <button onclick="openGame('https://raw.githubusercontent.com/Loamy88/Html-Games/main/snake')">Snake</button>
+    </div>
+
+    <script>
+        const encodedPassword = 'bGV0LW1lLWlu'; // you will not figure it out
+
+        function checkPassword() {
+            const passwordInput = document.getElementById('password').value;
+            const encodedInput = btoa(passwordInput);
+            if (encodedInput === encodedPassword) {
+                document.getElementById('game-selection').style.display = 'block';
+                document.getElementById('password').style.display = 'none';
+                document.querySelector('button[onclick="checkPassword()"]').style.display = 'none';
+            } else {
+                alert('Incorrect password. Please try again.');
+            }
+        }
+
+        function openGame(url) {
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    let newWindow = window.open();
+                    newWindow.document.open();
+                    newWindow.document.write(html);
+                    newWindow.document.close();
+                })
+                .catch(error => console.error('Error fetching game:', error));
+        }
+    </script>
+</body>
+</html>
