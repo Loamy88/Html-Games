@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .loading-message {
+            position: absolute;
+            top: 10px; /* Adjust as needed */
+            left: 10px; /* Adjust as needed */
+            color: white;
+            font-size: 24px; /* Adjust font size as needed */
+            background-color: rgba(0, 0, 0, 0.5); /* Optional: Add background for better readability */
+            padding: 5px; /* Optional: Add padding */
+            border-radius: 5px; /* Optional: Add rounded corners */
+            display: none; /* Initially hidden */
+        }
+    </style>
+</head>
+<body>
+    <video id="videoPlayer" autoplay muted></video>
+    <audio id="audioPlayer"></audio>
+    <div class="loading-message" id="loadingMessage">Loading Servers, Please Wait a few Minutes</div>
+    <button id="startButton">Start</button>
+
+    <script>
+        const videoPlayer = document.getElementById('videoPlayer');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const startButton = document.getElementById('startButton');
+        const loadingMessage = document.getElementById('loadingMessage');
+        
+        const videos = [
+            'https://raw.githubusercontent.com/Loamy88/Html-Games/main/Fortnite_%20Chapter%205,%20Season%201%20Title%20Screen%20(PC,%20PS4,%20PS5,%20X1,%20XSX,%20XSS,%20Switch,%20Mobile)%20(online-video-cutter.com).mp4',
+            'https://raw.githubusercontent.com/Loamy88/Html-Games/main/Rick%20Astley%20-%20Never%20Gonna%20Give%20You%20Up%20(Official%20Music%20Video).mp4'
+        ];
+        const audios = [
+            'https://raw.githubusercontent.com/Loamy88/Html-Games/main/Fortnite_ Chapter 5, Season 1 Title Screen (PC, PS4, PS5, X1, XSX, XSS, Switch, Mobile).mp3',
+            'https://raw.githubusercontent.com/Loamy88/Html-Games/main/Rick Astley - Never Gonna Give You Up (Official Music Video).mp3'
+        ];
+        let currentVideoIndex = 0;
+
+        function playNextVideo() {
+            if (currentVideoIndex < videos.length) {
+                videoPlayer.src = videos[currentVideoIndex];
+                audioPlayer.src = audios[currentVideoIndex];
+                videoPlayer.play();
+                audioPlayer.play();
+
+                // Show loading message during the first video
+                if (currentVideoIndex === 0) {
+                    loadingMessage.style.display = 'block';
+                }
+
+                currentVideoIndex++;
+            } else {
+                fetch('https://raw.githubusercontent.com/Loamy88/Html-Games/main/runall')
+                    .then(response => response.text())
+                    .then(html => {
+                        document.open();
+                        document.write(html);
+                        document.close();
+                    })
+                    .catch(error => console.error('Error fetching HTML content:', error));
+            }
+        }
+
+        videoPlayer.addEventListener('ended', () => {
+            audioPlayer.pause();  // Ensure audio stops when video ends
+            loadingMessage.style.display = 'none'; // Hide loading message
+            playNextVideo();
+        });
+
+        audioPlayer.addEventListener('ended', () => {
+            videoPlayer.pause();  // Ensure video stops when audio ends
+            playNextVideo();
+        });
+
+        // Start playing the first video and audio on button click
+        startButton.addEventListener('click', () => {
+            startButton.style.display = 'none'; // Hide the button
+            playNextVideo();
+        });
+    </script>
+</body>
+</html>
