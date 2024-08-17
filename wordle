@@ -224,13 +224,7 @@
                     tile.classList.add(color);
 
                     // Update the keyboard key color
-                    const keyElement = keyboardContainer.querySelector(`.key[data-key="${guess[i]}"]`);
-                    if (keyElement) {
-                        if (!keyElement.classList.contains('correct')) {
-                            keyElement.classList.remove('absent', 'present');
-                            keyElement.classList.add(color);
-                        }
-                    }
+                    updateKeyboardKeyColor(guess[i], color);
                 }, i * 400);
             });
 
@@ -248,18 +242,35 @@
             }, 5 * 400);
         }
 
+        function updateKeyboardKeyColor(letter, color) {
+            const keyElement = keyboardContainer.querySelector(`.key[data-key="${letter}"]`);
+            if (keyElement) {
+                console.log(`Updating color for key "${letter}" to "${color}"`); // Debugging line
+
+                // Directly apply styles
+                if (color === 'correct') {
+                    keyElement.style.backgroundColor = '#6aaa64';
+                    keyElement.style.borderColor = '#6aaa64';
+                } else if (color === 'present') {
+                    keyElement.style.backgroundColor = '#c9b458';
+                    keyElement.style.borderColor = '#c9b458';
+                } else if (color === 'absent') {
+                    keyElement.style.backgroundColor = '#2f2f2f';
+                    keyElement.style.borderColor = '#2f2f2f';
+                }
+            }
+        }
+
         function setMessage(message) {
             messageContainer.textContent = message;
             setTimeout(() => {
                 messageContainer.textContent = '';
-            }, 3000); // Hide the message after 3 seconds
+            }, 3000);
         }
 
         function endGame() {
-            keyboardContainer.style.display = 'none';
             restartButton.style.display = 'block';
         }
     </script>
-
 </body>
 </html>
