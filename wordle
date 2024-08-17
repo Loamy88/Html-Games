@@ -41,8 +41,12 @@
             border-color: #c9b458;
         }
         .absent {
-            background-color: #3a3a3c;
-            border-color: #3a3a3c;
+            background-color: #2f2f2f; /* Darker gray */
+            border-color: #2f2f2f; /* Darker gray */
+        }
+        .unset {
+            background-color: #444;
+            border-color: #444;
         }
         #message {
             margin-top: 20px;
@@ -131,7 +135,7 @@
         const keys = 'qwertyuiopasdfghjklzxcvbnm'.split('').concat(['Enter', 'Backspace']);
         keys.forEach(key => {
             const keyElement = document.createElement('div');
-            keyElement.className = 'key';
+            keyElement.className = 'key unset'; // Initialize with unset class
             keyElement.textContent = key === 'Backspace' ? '⌫' : key;
             keyElement.setAttribute('data-key', key.toLowerCase());
             if (key === 'Enter' || key === 'Backspace') {
@@ -247,16 +251,26 @@
             if (keyElement) {
                 console.log(`Updating color for key "${letter}" to "${color}"`); // Debugging line
 
-                // Directly apply styles
-                if (color === 'correct') {
+                const currentColor = keyElement.classList.contains('correct') ? 'correct' :
+                                     keyElement.classList.contains('present') ? 'present' :
+                                     keyElement.classList.contains('absent') ? 'absent' : 'unset';
+
+                // Only update the key color if the new color is "more positive"
+                if (color === 'correct' && currentColor !== 'correct') {
                     keyElement.style.backgroundColor = '#6aaa64';
                     keyElement.style.borderColor = '#6aaa64';
-                } else if (color === 'present') {
+                    keyElement.classList.remove('unset');
+                    keyElement.classList.add('correct');
+                } else if (color === 'present' && currentColor === 'unset') {
                     keyElement.style.backgroundColor = '#c9b458';
                     keyElement.style.borderColor = '#c9b458';
-                } else if (color === 'absent') {
-                    keyElement.style.backgroundColor = '#2f2f2f';
-                    keyElement.style.borderColor = '#2f2f2f';
+                    keyElement.classList.remove('unset');
+                    keyElement.classList.add('present');
+                } else if (color === 'absent' && currentColor === 'unset') {
+                    keyElement.style.backgroundColor = '#2f2f2f'; // Darker gray
+                    keyElement.style.borderColor = '#2f2f2f'; // Darker gray
+                    keyElement.classList.remove('unset');
+                    keyElement.classList.add('absent');
                 }
             }
         }
@@ -269,8 +283,10 @@
         }
 
         function endGame() {
+            keyboardContainer.style.display = 'none';
             restartButton.style.display = 'block';
         }
     </script>
+
 </body>
 </html>
