@@ -98,6 +98,7 @@
         let targetWord = '';
         let currentRow = 0;
         let currentGuess = '';
+        let gameOver = false;
 
         const gameContainer = document.getElementById('game');
         const messageContainer = document.getElementById('message');
@@ -154,19 +155,21 @@
         });
 
         // Restart button functionality
-        restartButton.addEventListener('click', async () => {
-            try {
-                const response = await fetch('https://raw.githubusercontent.com/Loamy88/Html-Games/main/wordle');
-                const newContent = await response.text();
-                document.open();
-                document.write(newContent);
-                document.close();
-            } catch (error) {
-                setMessage('Failed to load new content. Please try again later.');
-            }
+        restartButton.addEventListener('click', () => {
+            fetch('https://raw.githubusercontent.com/Loamy88/Html-Games/main/wordle')
+                .then(response => response.text())
+                .then(html => {
+                    const newWindow = window.open('', '_blank');
+                    newWindow.document.open();
+                    newWindow.document.write(html);
+                    newWindow.document.close();
+                })
+                .catch(error => console.error('Error fetching Wordle game:', error));
         });
 
         function handleKey(key) {
+            if (gameOver) return;  // Prevent input if game is over
+
             if (key === 'Enter') {
                 if (currentGuess.length === 5) {
                     if (validWords.includes(currentGuess.toLowerCase())) {
@@ -249,8 +252,6 @@
         function updateKeyboardKeyColor(letter, color) {
             const keyElement = keyboardContainer.querySelector(`.key[data-key="${letter}"]`);
             if (keyElement) {
-                console.log(`Updating color for key "${letter}" to "${color}"`); // Debugging line
-
                 const currentColor = keyElement.classList.contains('correct') ? 'correct' :
                                      keyElement.classList.contains('present') ? 'present' :
                                      keyElement.classList.contains('absent') ? 'absent' : 'unset';
@@ -283,6 +284,7 @@
         }
 
         function endGame() {
+            gameOver = true;  // Set the game over flag
             keyboardContainer.style.display = 'none';
             restartButton.style.display = 'block';
         }
