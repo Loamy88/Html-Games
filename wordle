@@ -60,7 +60,7 @@
         }
         .key {
             padding: 10px;
-            background-color: #444;
+            background-color: #555;
             color: white;
             text-align: center;
             cursor: pointer;
