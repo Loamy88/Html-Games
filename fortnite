@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Player</title>
+    <title>Fortnite</title>
     <style>
         body, html {
             margin: 0;
@@ -43,14 +43,14 @@
     </style>
 </head>
 <body>
-    <video id="videoPlayer" autoplay muted></video>
-    <audio id="audioPlayer"></audio>
+    <video id="Fortnite" autoplay muted></video>
+    <audio id="FortniteAudio"></audio>
     <div class="loading-message" id="loadingMessage">Loading Servers, Please Wait a few Minutes</div>
     <button id="startButton">Start</button>
 
     <script>
-        const videoPlayer = document.getElementById('videoPlayer');
-        const audioPlayer = document.getElementById('audioPlayer');
+        const Fortnite = document.getElementById('Fortnite');
+        const FortniteAudio = document.getElementById('FortniteAudio');
         const startButton = document.getElementById('startButton');
         const loadingMessage = document.getElementById('loadingMessage');
         
@@ -66,10 +66,10 @@
 
         function playNextVideo() {
             if (currentVideoIndex < videos.length) {
-                videoPlayer.src = videos[currentVideoIndex];
-                audioPlayer.src = audios[currentVideoIndex];
-                videoPlayer.play();
-                audioPlayer.play();
+                Fortnite.src = videos[currentVideoIndex];
+                FortniteAudio.src = audios[currentVideoIndex];
+                Fortnite.play();
+                FortniteAudio.play();
 
                 // Show loading message during the first video
                 if (currentVideoIndex === 0) {
@@ -89,14 +89,14 @@
             }
         }
 
-        videoPlayer.addEventListener('ended', () => {
-            audioPlayer.pause();  // Ensure audio stops when video ends
+        Fortnite.addEventListener('ended', () => {
+            FortniteAudio.pause();  // Ensure audio stops when video ends
             loadingMessage.style.display = 'none'; // Hide loading message
             playNextVideo();
         });
 
-        audioPlayer.addEventListener('ended', () => {
-            videoPlayer.pause();  // Ensure video stops when audio ends
+        FortniteAudio.addEventListener('ended', () => {
+            Fortnite.pause();  // Ensure video stops when audio ends
             playNextVideo();
         });
 
